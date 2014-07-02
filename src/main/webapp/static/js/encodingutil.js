@@ -24,7 +24,7 @@ $(function() {
         $('#decodeAlert').empty().hide();
         $.ajax({
             dataType: "json",
-            url: '/api/decode',
+            url: 'api/decode',
             data: {
                 'inputEncoding': $('#decodeEncoding').val(),
                 'hexBytes': $('#decodeHex').val()
@@ -38,7 +38,7 @@ $(function() {
         $('#encodeAlert').empty().hide();
         $.ajax({
             dataType: "json",
-            url: '/api/encode',
+            url: 'api/encode',
             data: {
                 'outputEncoding': $('#encodeEncoding').val(),
                 'string': $('#encodeText').val()
@@ -52,7 +52,7 @@ $(function() {
         $('#transcodeAlert').empty().hide();
         $.ajax({
             dataType: "json",
-            url: '/api/transcode',
+            url: 'api/transcode',
             data: {
                 'inputEncoding': $('#transcodeInputEncoding').val(),
                 'outputEncoding': $('#transcodeOutputEncoding').val(),

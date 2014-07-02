@@ -1,4 +1,4 @@
 encoding-junk
 =============
 
-Published at http://encodingutil.aws.af.cm
+Published at http://b.abbies.us/encoding-junk/
