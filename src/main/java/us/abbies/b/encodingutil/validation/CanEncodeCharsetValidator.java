@@ -13,7 +13,7 @@ public class CanEncodeCharsetValidator implements ConstraintValidator<CanEncodeC
     public boolean isValid(String value, ConstraintValidatorContext context) {
         try {
             return Charset.forName(value).canEncode();
-        } catch (Throwable t) {
+        } catch (Exception e) {
             return false;
         }
     }

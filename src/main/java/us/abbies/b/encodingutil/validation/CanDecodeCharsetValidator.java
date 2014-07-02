@@ -14,7 +14,7 @@ public class CanDecodeCharsetValidator implements ConstraintValidator<CanDecodeC
         try {
             Charset.forName(value);
             return true;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             return false;
         }
     }

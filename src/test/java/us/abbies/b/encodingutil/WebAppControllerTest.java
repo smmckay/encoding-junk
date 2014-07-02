@@ -1,6 +1,5 @@
 package us.abbies.b.encodingutil;
 
-import org.apache.commons.codec.DecoderException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,53 +19,25 @@ public class WebAppControllerTest {
 
     @Test
     public void testTranscode() throws Exception {
-        TranscodeRequest req = new TranscodeRequest();
-        req.setInputEncoding("UTF-8");
-        req.setOutputEncoding("UTF-8");
-        req.setHexBytes("4444");
-        testRequest(req, "4444");
-
-        req.setOutputEncoding("UTF-16BE");
-        testRequest(req, "00440044");
+        checkResult(controller.transcode("UTF-8", "UTF-8", "4444"), "4444");
+        checkResult(controller.transcode("UTF-8", "UTF-16BE", "4444"), "00440044");
     }
 
     @Test
     public void testDecode() throws Exception {
-        DecodeRequest req = new DecodeRequest();
-        req.setInputEncoding("UTF-8");
-        req.setHexBytes("4444");
-        testRequest(req, "DD");
-
-        req.setInputEncoding("UTF-16BE");
-        req.setHexBytes("00440044");
-        testRequest(req, "DD");
+        checkResult(controller.decode("UTF-8", "4444"), "DD");
+        checkResult(controller.decode("UTF-16BE", "00440044"), "DD");
     }
 
     @Test
     public void testEncode() throws Exception {
-        EncodeRequest req = new EncodeRequest();
-        req.setOutputEncoding("UTF-8");
-        req.setString("DD");
-        testRequest(req, "4444");
-
-        req.setOutputEncoding("UTF-16BE");
-        testRequest(req, "00440044");
+        checkResult(controller.encode("UTF-8", "DD"), "4444");
+        checkResult(controller.encode("UTF-16BE", "DD"), "00440044");
     }
 
-    private void testRequest(Object req, String value) throws DecoderException {
-        Map<String, String> result;
-        if (req instanceof TranscodeRequest) {
-            result = controller.get((TranscodeRequest) req);
-        } else if (req instanceof DecodeRequest) {
-            result = controller.get((DecodeRequest) req);
-        } else if (req instanceof EncodeRequest) {
-            result = controller.get((EncodeRequest) req);
-        } else {
-            throw new IllegalArgumentException("req: " + req);
-        }
-
+    private static void checkResult(Map<String, String> result, String expected) {
         assertThat(result)
                 .hasSize(1)
-                .includes(entry("output", value));
+                .includes(entry("output", expected));
     }
 }
