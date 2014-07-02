@@ -2,25 +2,48 @@ package us.abbies.b.encodingutil;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import us.abbies.b.encodingutil.validation.CanDecodeCharset;
+import us.abbies.b.encodingutil.validation.CanEncodeCharset;
+import us.abbies.b.encodingutil.validation.HexString;
+import us.abbies.b.encodingutil.validation.NotEmpty;
 
-import javax.validation.Valid;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-@Controller
+@RestController
+@Validated
 @RequestMapping(value = "/api", method = GET)
 public class WebAppController {
-    @RequestMapping("/transcode")
-    public Map<String, String> get(@Valid TranscodeRequest req) throws DecoderException {
-        Charset inputCharset = Charset.forName(req.getInputEncoding());
-        Charset outputCharset = Charset.forName(req.getOutputEncoding());
+    @ExceptionHandler
+    public Map<String, Object> handleConstraintViolationException(ConstraintViolationException cve) {
+        List<String> errors = cve.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toList());
+        return Collections.<String, Object>singletonMap("errors", errors);
+    }
 
-        byte[] inputBytes = Hex.decodeHex(req.getHexBytes().toCharArray());
+    @ExceptionHandler
+    public Map<String, Object> handleException(Exception ex) {
+        return Collections.<String, Object>singletonMap("message", ex.getMessage());
+    }
+
+    @RequestMapping("/transcode")
+    public Map<String, String> transcode(@CanDecodeCharset String inputEncoding,
+                                         @CanEncodeCharset String outputEncoding,
+                                         @HexString String hexBytes) throws DecoderException {
+        Charset inputCharset = Charset.forName(inputEncoding);
+        Charset outputCharset = Charset.forName(outputEncoding);
+
+        byte[] inputBytes = Hex.decodeHex(hexBytes.toCharArray());
         String inputString = new String(inputBytes, inputCharset);
         byte[] outputBytes = inputString.getBytes(outputCharset);
         String outputString = new String(Hex.encodeHex(outputBytes, false));
@@ -28,18 +51,19 @@ public class WebAppController {
     }
 
     @RequestMapping("/decode")
-    public Map<String, String> get(@Valid DecodeRequest req) throws DecoderException {
-        Charset inputCharset = Charset.forName(req.getInputEncoding());
-        byte[] inputBytes = Hex.decodeHex(req.getHexBytes().toCharArray());
+    public Map<String, String> decode(@CanDecodeCharset String inputEncoding,
+                                      @HexString String hexBytes) throws DecoderException {
+        Charset inputCharset = Charset.forName(inputEncoding);
+        byte[] inputBytes = Hex.decodeHex(hexBytes.toCharArray());
         String outputString = new String(inputBytes, inputCharset);
         return Collections.singletonMap("output", outputString);
     }
 
     @RequestMapping("/encode")
-    public Map<String, String> get(@Valid EncodeRequest req) {
-        Charset outputCharset = Charset.forName(req.getOutputEncoding());
-        String inputString = req.getString();
-        byte[] outputBytes = inputString.getBytes(outputCharset);
+    public Map<String, String> encode(@CanEncodeCharset String outputEncoding,
+                                      @NotEmpty String string) {
+        Charset outputCharset = Charset.forName(outputEncoding);
+        byte[] outputBytes = string.getBytes(outputCharset);
         String outputString = new String(Hex.encodeHex(outputBytes, false));
         return Collections.singletonMap("output", outputString);
     }

@@ -3,37 +3,19 @@ package us.abbies.b.encodingutil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import us.abbies.b.encodingutil.view.JsonExceptionResolver;
-import us.abbies.b.encodingutil.view.JsonViewResolver;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
-@EnableWebMvc
 @ComponentScan
-public class WebAppConfig extends WebMvcConfigurerAdapter {
+public class WebAppConfig extends WebMvcConfigurationSupport {
     @Bean
-    public ViewResolver viewResolver() {
-        return new JsonViewResolver();
-    }
-
-    @Bean
-    public HandlerExceptionResolver handlerExceptionResolver() {
-        return new JsonExceptionResolver();
-    }
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("redirect:/index.html");
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
     }
 
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
     }
-
 }
