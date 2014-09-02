@@ -8,12 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import us.abbies.b.encodingutil.validation.CanDecodeCharset;
 import us.abbies.b.encodingutil.validation.CanEncodeCharset;
-import us.abbies.b.encodingutil.validation.HexBytes;
+import us.abbies.b.encodingutil.validation.HexString;
+import us.abbies.b.encodingutil.validation.NotEmpty;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +43,8 @@ public class WebAppController {
 
     @RequestMapping("/transcode")
     public Map<String, String> transcode(@CanDecodeCharset String inputEncoding,
-                                   @CanEncodeCharset String outputEncoding,
-                                   @HexBytes String hexBytes) throws DecoderException {
+                                         @CanEncodeCharset String outputEncoding,
+                                         @HexString String hexBytes) throws DecoderException {
         Charset inputCharset = Charset.forName(inputEncoding);
         Charset outputCharset = Charset.forName(outputEncoding);
 
@@ -58,7 +57,7 @@ public class WebAppController {
 
     @RequestMapping("/decode")
     public Map<String, String> decode(@CanDecodeCharset String inputEncoding,
-                                   @HexBytes String hexBytes) throws DecoderException {
+                                      @HexString String hexBytes) throws DecoderException {
         Charset inputCharset = Charset.forName(inputEncoding);
         byte[] inputBytes = Hex.decodeHex(hexBytes.toCharArray());
         String outputString = new String(inputBytes, inputCharset);
@@ -67,8 +66,7 @@ public class WebAppController {
 
     @RequestMapping("/encode")
     public Map<String, String> encode(@CanEncodeCharset String outputEncoding,
-                                   @NotNull(message = "Invalid text")
-                                   @Size(min = 1, message = "Invalid text") String string) {
+                                      @NotEmpty String string) {
         Charset outputCharset = Charset.forName(outputEncoding);
         byte[] outputBytes = string.getBytes(outputCharset);
         String outputString = new String(Hex.encodeHex(outputBytes, false));

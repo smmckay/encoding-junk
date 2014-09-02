@@ -1,49 +1,69 @@
 $(function() {
     var htmlForErrors = function(errors) {
-        var html = '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><ul>';
+        var html = '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>';
         for (var i = 0; i < errors.length; i++) {
-            html += '<li>' + errors[i] + '</li>';
+            html += '<p>' + errors[i] + '</p>';
         }
-        html += '</ul></div>';
+        html += '</div>';
         return html;
     };
 
-    var handleResponse = function(rsp, elem) {
-        if (rsp.hasOwnProperty('output')) {
-            $(elem).val(rsp['output'])
-        } else if (rsp.hasOwnProperty('errors')) {
-            $('#errorbox').append(htmlForErrors(rsp['errors']));
+    var successFactory = function(textElem, alertDiv) {
+        return function(rsp) {
+            if (rsp.hasOwnProperty('output')) {
+                $(textElem).val(rsp['output']);
+            } else if (rsp.hasOwnProperty('errors')) {
+                $(alertDiv).append(htmlForErrors(rsp['errors']));
+            }
+        }
+    };
+
+    var errorFactory = function(alertDiv) {
+        return function() {
+            $(alertDiv).append(htmlForErrors(['Server error']));
         }
     };
 
     $('#decodeSubmit').click(function() {
-        $('#errorbox').empty();
-        $.getJSON('/api/decode', {
-            'inputEncoding': $('#decodeEncoding').val(),
-            'hexBytes': $('#decodeHex').val()
-        }, function(rsp) {
-            handleResponse(rsp, '#decodeText');
-        })
+        $('#decodeAlert').empty();
+        $.ajax({
+            dataType: "json",
+            url: 'api/decode',
+            data: {
+                'inputEncoding': $('#decodeEncoding').val(),
+                'hexBytes': $('#decodeHex').val()
+            },
+            success: successFactory('#decodeText', '#decodeAlert'),
+            error: errorFactory('#decodeAlert')
+        });
     });
 
     $('#encodeSubmit').click(function() {
-        $('#errorbox').empty();
-        $.getJSON('/api/encode', {
-            'outputEncoding': $('#encodeEncoding').val(),
-            'string': $('#encodeText').val()
-        }, function(rsp) {
-            handleResponse(rsp, '#encodeHex');
+        $('#encodeAlert').empty();
+        $.ajax({
+            dataType: "json",
+            url: 'api/encode',
+            data: {
+                'outputEncoding': $('#encodeEncoding').val(),
+                'string': $('#encodeText').val()
+            },
+            success: successFactory('#encodeHex', '#encodeAlert'),
+            error: errorFactory('#encodeAlert')
         });
     });
 
     $('#transcodeSubmit').click(function() {
-        $('#errorbox').empty();
-        $.getJSON('/api/transcode', {
-            'inputEncoding': $('#transcodeInputEncoding').val(),
-            'outputEncoding': $('#transcodeOutputEncoding').val(),
-            'hexBytes': $('#transcodeInputHex').val()
-        }, function(rsp) {
-            handleResponse(rsp, '#transcodeOutputHex');
-        })
+        $('#transcodeAlert').empty();
+        $.ajax({
+            dataType: "json",
+            url: 'api/transcode',
+            data: {
+                'inputEncoding': $('#transcodeInputEncoding').val(),
+                'outputEncoding': $('#transcodeOutputEncoding').val(),
+                'hexBytes': $('#transcodeInputHex').val()
+            },
+            success: successFactory('#transcodeOutputHex', '#transcodeAlert'),
+            error: errorFactory('#transcodeAlert')
+        });
     })
 });
