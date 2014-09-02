@@ -11,10 +11,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Constraint(validatedBy = CanEncodeCharsetValidator.class)
 @Retention(RUNTIME)
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 @Documented
 public @interface CanEncodeCharset {
-    String message() default "{us.abbies.b.encodingutil.validation.CanEncodeCharset.message}";
+    String message() default "Invalid charset";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
